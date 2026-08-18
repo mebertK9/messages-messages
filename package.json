@@ -1,7 +1,6 @@
 {
   "name": "household-wishlist-api",
   "version": "0.1.0",
-  "type": "module",
   "engines": {
     "node": "24.x"
   },
@@ -10,9 +9,9 @@
     "build": "tsc --noEmit && tsc",
     "start": "node dist/index.js",
     "typeorm": "typeorm",
-    "migration:generate": "typeorm migration:generate src/migrations/$0",
-    "migration:run": "typeorm migration:run",
-    "migration:revert": "typeorm migration:revert",
+    "migration:generate": "tsx ./node_modules/typeorm/cli.js migration:generate src/migrations/$0 -d src/config/database.ts",
+    "migration:run": "typeorm migration:run -d dist/config/database.js",
+    "migration:revert": "typeorm migration:revert -d dist/config/database.js",
     "seed": "tsx src/seeds/seedShops.ts",
     "test": "vitest",
     "lint": "eslint src --ext .ts"
