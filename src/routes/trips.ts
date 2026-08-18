@@ -35,7 +35,7 @@ router.get('/:tripId', authenticated, async (req, res, next) => {
   }
 });
 
-router.post('/:tripId/stops/:stopId/wishes', authenticated, async (req, res, next) => {
+router.post('/:tripId/stops/:stopId/wishes', authenticated, async (_req, res, next) => {
   try {
     // TODO: Implement manual wish assignment
     res.status(501).json({ message: 'Not implemented' });

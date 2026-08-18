@@ -5,7 +5,7 @@ import { ShopService } from '../services/ShopService';
 const router = Router();
 const shopService = new ShopService();
 
-router.get('/', authenticated, async (req, res, next) => {
+router.get('/', authenticated, async (_req, res, next) => {
   try {
     const shops = await shopService.list();
     res.json(shops);

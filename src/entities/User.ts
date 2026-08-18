@@ -10,26 +10,26 @@ export class User {
   id = uuid();
 
   @Column('text', { unique: true })
-  email: string;
+  email!: string;
 
   @Column('text')
-  name: string;
+  name!: string;
 
   @Column('text')
-  passwordHash: string;
+  passwordHash!: string;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 
   @OneToMany(() => Wish, (wish) => wish.createdBy)
-  wishes: Wish[];
+  wishes!: Wish[];
 
   @OneToMany(() => ShoppingTrip, (trip) => trip.startedBy)
-  trips: ShoppingTrip[];
+  trips!: ShoppingTrip[];
 
   @OneToMany(() => Notification, (notif) => notif.recipient)
-  notifications: Notification[];
+  notifications!: Notification[];
 }

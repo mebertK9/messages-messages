@@ -12,18 +12,18 @@ export class Wish {
   id = uuid();
 
   @Column('uuid')
-  productId: string;
+  productId!: string;
 
   @ManyToOne(() => Product, { onDelete: 'RESTRICT', eager: true })
   @JoinColumn({ name: 'productId' })
-  product: Product;
+  product!: Product;
 
   @Column('uuid')
-  createdById: string;
+  createdById!: string;
 
   @ManyToOne(() => User, { onDelete: 'RESTRICT', eager: true })
   @JoinColumn({ name: 'createdById' })
-  createdBy: User;
+  createdBy!: User;
 
   @Column('uuid', { nullable: true })
   assignedTripStopId?: string;
@@ -33,11 +33,11 @@ export class Wish {
   assignedTripStop?: TripStop | null;
 
   @Column('enum', { enum: ['open', 'onTrip', 'purchased', 'cancelled'] })
-  status: 'open' | 'onTrip' | 'purchased' | 'cancelled';
+  status!: 'open' | 'onTrip' | 'purchased' | 'cancelled';
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @OneToMany(() => Notification, (notif) => notif.wish)
-  notifications: Notification[];
+  notifications!: Notification[];
 }

@@ -1,0 +1,339 @@
+diff --git a/src/config/database.ts b/src/config/database.ts
+index b5fa3e9..204292e 100644
+--- a/src/config/database.ts
++++ b/src/config/database.ts
+@@ -19,6 +19,6 @@ export const AppDataSource = new DataSource({
+   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+   synchronize: false,
+   logging: isDev,
+-  entities: ['dist/entities/*.js'],
+-  migrations: ['dist/migrations/*.js'],
++  entities: [User, Shop, Product, Wish, ShoppingTrip, TripStop, Notification],
++  migrations: [isDev ? 'src/migrations/*.ts' : 'dist/migrations/*.js'],
+ });
+diff --git a/src/entities/Notification.ts b/src/entities/Notification.ts
+index d3e5946..dd14c35 100644
+--- a/src/entities/Notification.ts
++++ b/src/entities/Notification.ts
+@@ -10,25 +10,25 @@ export class Notification {
+   id = uuid();
+ 
+   @Column('uuid')
+-  wishId: string;
++  wishId!: string;
+ 
+   @ManyToOne(() => Wish, { onDelete: 'CASCADE', eager: true })
+   @JoinColumn({ name: 'wishId' })
+-  wish: Wish;
++  wish!: Wish;
+ 
+   @Column('uuid')
+-  recipientId: string;
++  recipientId!: string;
+ 
+   @ManyToOne(() => User, { onDelete: 'CASCADE', eager: true })
+   @JoinColumn({ name: 'recipientId' })
+-  recipient: User;
++  recipient!: User;
+ 
+   @Column('enum', { enum: ['wishOnTrip', 'wishAddedToActiveTrip', 'wishRetracted', 'wishNotFound'] })
+-  type: 'wishOnTrip' | 'wishAddedToActiveTrip' | 'wishRetracted' | 'wishNotFound';
++  type!: 'wishOnTrip' | 'wishAddedToActiveTrip' | 'wishRetracted' | 'wishNotFound';
+ 
+   @Column('boolean', { default: false })
+-  read: boolean;
++  read!: boolean;
+ 
+   @CreateDateColumn()
+-  createdAt: Date;
++  createdAt!: Date;
+ }
+diff --git a/src/entities/Product.ts b/src/entities/Product.ts
+index 983465f..4b49abd 100644
+--- a/src/entities/Product.ts
++++ b/src/entities/Product.ts
+@@ -9,7 +9,7 @@ export class Product {
+   id = uuid();
+ 
+   @Column('text')
+-  name: string;
++  name!: string;
+ 
+   @Column('uuid', { nullable: true })
+   preferredShopId?: string;
+@@ -19,11 +19,11 @@ export class Product {
+   preferredShop?: Shop | null;
+ 
+   @CreateDateColumn()
+-  createdAt: Date;
++  createdAt!: Date;
+ 
+   @UpdateDateColumn()
+-  updatedAt: Date;
++  updatedAt!: Date;
+ 
+   @OneToMany(() => Wish, (wish) => wish.product)
+-  wishes: Wish[];
++  wishes!: Wish[];
+ }
+diff --git a/src/entities/Shop.ts b/src/entities/Shop.ts
+index ac1d4a5..a887ca1 100644
+--- a/src/entities/Shop.ts
++++ b/src/entities/Shop.ts
+@@ -9,14 +9,14 @@ export class Shop {
+   id = uuid();
+ 
+   @Column('text')
+-  name: string;
++  name!: string;
+ 
+   @CreateDateColumn()
+-  createdAt: Date;
++  createdAt!: Date;
+ 
+   @OneToMany(() => Product, (product) => product.preferredShop)
+-  products: Product[];
++  products!: Product[];
+ 
+   @OneToMany(() => TripStop, (stop) => stop.shop)
+-  stops: TripStop[];
++  stops!: TripStop[];
+ }
+diff --git a/src/entities/ShoppingTrip.ts b/src/entities/ShoppingTrip.ts
+index d840b61..37843ae 100644
+--- a/src/entities/ShoppingTrip.ts
++++ b/src/entities/ShoppingTrip.ts
+@@ -9,18 +9,18 @@ export class ShoppingTrip {
+   id = uuid();
+ 
+   @Column('uuid')
+-  startedById: string;
++  startedById!: string;
+ 
+   @ManyToOne(() => User, { onDelete: 'RESTRICT', eager: true })
+   @JoinColumn({ name: 'startedById' })
+-  startedBy: User;
++  startedBy!: User;
+ 
+   @Column('enum', { enum: ['active', 'done'] })
+-  status: 'active' | 'done';
++  status!: 'active' | 'done';
+ 
+   @CreateDateColumn()
+-  startedAt: Date;
++  startedAt!: Date;
+ 
+   @OneToMany(() => TripStop, (stop) => stop.trip, { cascade: true, eager: true })
+-  stops: TripStop[];
++  stops!: TripStop[];
+ }
+diff --git a/src/entities/TripStop.ts b/src/entities/TripStop.ts
+index 0617b1e..9442418 100644
+--- a/src/entities/TripStop.ts
++++ b/src/entities/TripStop.ts
+@@ -10,25 +10,25 @@ export class TripStop {
+   id = uuid();
+ 
+   @Column('uuid')
+-  tripId: string;
++  tripId!: string;
+ 
+   @ManyToOne(() => ShoppingTrip, { onDelete: 'CASCADE', eager: true })
+   @JoinColumn({ name: 'tripId' })
+-  trip: ShoppingTrip;
++  trip!: ShoppingTrip;
+ 
+   @Column('uuid')
+-  shopId: string;
++  shopId!: string;
+ 
+   @ManyToOne(() => Shop, { onDelete: 'RESTRICT', eager: true })
+   @JoinColumn({ name: 'shopId' })
+-  shop: Shop;
++  shop!: Shop;
+ 
+   @Column('enum', { enum: ['active', 'done'] })
+-  status: 'active' | 'done';
++  status!: 'active' | 'done';
+ 
+   @CreateDateColumn()
+-  createdAt: Date;
++  createdAt!: Date;
+ 
+   @OneToMany(() => Wish, (wish) => wish.assignedTripStop)
+-  wishes: Wish[];
++  wishes!: Wish[];
+ }
+diff --git a/src/entities/User.ts b/src/entities/User.ts
+index cfc732d..fa5a570 100644
+--- a/src/entities/User.ts
++++ b/src/entities/User.ts
+@@ -10,26 +10,26 @@ export class User {
+   id = uuid();
+ 
+   @Column('text', { unique: true })
+-  email: string;
++  email!: string;
+ 
+   @Column('text')
+-  name: string;
++  name!: string;
+ 
+   @Column('text')
+-  passwordHash: string;
++  passwordHash!: string;
+ 
+   @CreateDateColumn()
+-  createdAt: Date;
++  createdAt!: Date;
+ 
+   @UpdateDateColumn()
+-  updatedAt: Date;
++  updatedAt!: Date;
+ 
+   @OneToMany(() => Wish, (wish) => wish.createdBy)
+-  wishes: Wish[];
++  wishes!: Wish[];
+ 
+   @OneToMany(() => ShoppingTrip, (trip) => trip.startedBy)
+-  trips: ShoppingTrip[];
++  trips!: ShoppingTrip[];
+ 
+   @OneToMany(() => Notification, (notif) => notif.recipient)
+-  notifications: Notification[];
++  notifications!: Notification[];
+ }
+diff --git a/src/entities/Wish.ts b/src/entities/Wish.ts
+index 870f9cd..f44741f 100644
+--- a/src/entities/Wish.ts
++++ b/src/entities/Wish.ts
+@@ -12,18 +12,18 @@ export class Wish {
+   id = uuid();
+ 
+   @Column('uuid')
+-  productId: string;
++  productId!: string;
+ 
+   @ManyToOne(() => Product, { onDelete: 'RESTRICT', eager: true })
+   @JoinColumn({ name: 'productId' })
+-  product: Product;
++  product!: Product;
+ 
+   @Column('uuid')
+-  createdById: string;
++  createdById!: string;
+ 
+   @ManyToOne(() => User, { onDelete: 'RESTRICT', eager: true })
+   @JoinColumn({ name: 'createdById' })
+-  createdBy: User;
++  createdBy!: User;
+ 
+   @Column('uuid', { nullable: true })
+   assignedTripStopId?: string;
+@@ -33,11 +33,11 @@ export class Wish {
+   assignedTripStop?: TripStop | null;
+ 
+   @Column('enum', { enum: ['open', 'onTrip', 'purchased', 'cancelled'] })
+-  status: 'open' | 'onTrip' | 'purchased' | 'cancelled';
++  status!: 'open' | 'onTrip' | 'purchased' | 'cancelled';
+ 
+   @CreateDateColumn()
+-  createdAt: Date;
++  createdAt!: Date;
+ 
+   @OneToMany(() => Notification, (notif) => notif.wish)
+-  notifications: Notification[];
++  notifications!: Notification[];
+ }
+diff --git a/src/index.ts b/src/index.ts
+index ee6d82f..f39ae07 100644
+--- a/src/index.ts
++++ b/src/index.ts
+@@ -26,7 +26,7 @@ app.use('/v1/trips', tripsRoutes);
+ app.use('/v1/notifications', notificationsRoutes);
+ 
+ // Health check
+-app.get('/health', (req, res) => {
++app.get('/health', (_req, res) => {
+   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+ });
+ 
+diff --git a/src/middleware/auth.ts b/src/middleware/auth.ts
+index 86505fd..7d6d1a2 100644
+--- a/src/middleware/auth.ts
++++ b/src/middleware/auth.ts
+@@ -22,7 +22,8 @@ export const authenticated = (req: Request, res: Response, next: NextFunction) =
+     const { sub } = authService.verifyToken(token);
+     req.user = { id: sub };
+     next();
++    return;
+   } catch (err) {
+-    res.status(401).json({ message: 'Invalid or expired token' });
++    return res.status(401).json({ message: 'Invalid or expired token' });
+   }
+ };
+diff --git a/src/middleware/errorHandler.ts b/src/middleware/errorHandler.ts
+index 1523436..62bfe7e 100644
+--- a/src/middleware/errorHandler.ts
++++ b/src/middleware/errorHandler.ts
+@@ -5,7 +5,7 @@ interface ApiError extends Error {
+   code?: string;
+ }
+ 
+-export const errorHandler = (err: ApiError, req: Request, res: Response, next: NextFunction) => {
++export const errorHandler = (err: ApiError, _req: Request, res: Response, _next: NextFunction) => {
+   const status = err.status || 500;
+   const message = err.message || 'Internal server error';
+ 
+diff --git a/src/routes/shops.ts b/src/routes/shops.ts
+index 9f900f3..e9fa4ec 100644
+--- a/src/routes/shops.ts
++++ b/src/routes/shops.ts
+@@ -5,7 +5,7 @@ import { ShopService } from '../services/ShopService';
+ const router = Router();
+ const shopService = new ShopService();
+ 
+-router.get('/', authenticated, async (req, res, next) => {
++router.get('/', authenticated, async (_req, res, next) => {
+   try {
+     const shops = await shopService.list();
+     res.json(shops);
+diff --git a/src/routes/trips.ts b/src/routes/trips.ts
+index e855442..3e70be9 100644
+--- a/src/routes/trips.ts
++++ b/src/routes/trips.ts
+@@ -35,7 +35,7 @@ router.get('/:tripId', authenticated, async (req, res, next) => {
+   }
+ });
+ 
+-router.post('/:tripId/stops/:stopId/wishes', authenticated, async (req, res, next) => {
++router.post('/:tripId/stops/:stopId/wishes', authenticated, async (_req, res, next) => {
+   try {
+     // TODO: Implement manual wish assignment
+     res.status(501).json({ message: 'Not implemented' });
+diff --git a/src/services/TripService.ts b/src/services/TripService.ts
+index 17af22c..96b432b 100644
+--- a/src/services/TripService.ts
++++ b/src/services/TripService.ts
+@@ -8,8 +8,6 @@ import type { CreateTripStopRequest } from '../dto/schemas';
+ 
+ export class TripService {
+   private tripRepo = AppDataSource.getRepository(ShoppingTrip);
+-  private stopRepo = AppDataSource.getRepository(TripStop);
+-  private wishRepo = AppDataSource.getRepository(Wish);
+   private notificationService = new NotificationService();
+ 
+   async list(status?: string) {
+diff --git a/tsconfig.json b/tsconfig.json
+index 4ac894a..3628a4d 100644
+--- a/tsconfig.json
++++ b/tsconfig.json
+@@ -6,6 +6,8 @@
+     "moduleResolution": "node",
+     "esModuleInterop": true,
+     "allowSyntheticDefaultImports": true,
++    "experimentalDecorators": true,
++    "emitDecoratorMetadata": true,
+     "strict": true,
+     "skipLibCheck": true,
+     "forceConsistentCasingInFileNames": true,

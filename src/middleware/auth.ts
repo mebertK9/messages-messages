@@ -22,7 +22,8 @@ export const authenticated = (req: Request, res: Response, next: NextFunction) =
     const { sub } = authService.verifyToken(token);
     req.user = { id: sub };
     next();
+    return;
   } catch (err) {
-    res.status(401).json({ message: 'Invalid or expired token' });
+    return res.status(401).json({ message: 'Invalid or expired token' });
   }
 };

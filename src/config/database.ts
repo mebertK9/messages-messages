@@ -19,6 +19,6 @@ export const AppDataSource = new DataSource({
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
   synchronize: false,
   logging: isDev,
-  entities: ['dist/entities/*.js'],
-  migrations: ['dist/migrations/*.js'],
+  entities: [User, Shop, Product, Wish, ShoppingTrip, TripStop, Notification],
+  migrations: [isDev ? 'src/migrations/*.ts' : 'dist/migrations/*.js'],
 });

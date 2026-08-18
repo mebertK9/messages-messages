@@ -9,7 +9,7 @@ export class Product {
   id = uuid();
 
   @Column('text')
-  name: string;
+  name!: string;
 
   @Column('uuid', { nullable: true })
   preferredShopId?: string;
@@ -19,11 +19,11 @@ export class Product {
   preferredShop?: Shop | null;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 
   @OneToMany(() => Wish, (wish) => wish.product)
-  wishes: Wish[];
+  wishes!: Wish[];
 }

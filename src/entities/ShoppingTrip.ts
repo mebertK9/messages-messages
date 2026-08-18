@@ -9,18 +9,18 @@ export class ShoppingTrip {
   id = uuid();
 
   @Column('uuid')
-  startedById: string;
+  startedById!: string;
 
   @ManyToOne(() => User, { onDelete: 'RESTRICT', eager: true })
   @JoinColumn({ name: 'startedById' })
-  startedBy: User;
+  startedBy!: User;
 
   @Column('enum', { enum: ['active', 'done'] })
-  status: 'active' | 'done';
+  status!: 'active' | 'done';
 
   @CreateDateColumn()
-  startedAt: Date;
+  startedAt!: Date;
 
   @OneToMany(() => TripStop, (stop) => stop.trip, { cascade: true, eager: true })
-  stops: TripStop[];
+  stops!: TripStop[];
 }

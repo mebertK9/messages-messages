@@ -8,8 +8,6 @@ import type { CreateTripStopRequest } from '../dto/schemas';
 
 export class TripService {
   private tripRepo = AppDataSource.getRepository(ShoppingTrip);
-  private stopRepo = AppDataSource.getRepository(TripStop);
-  private wishRepo = AppDataSource.getRepository(Wish);
   private notificationService = new NotificationService();
 
   async list(status?: string) {

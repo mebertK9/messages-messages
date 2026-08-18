@@ -9,14 +9,14 @@ export class Shop {
   id = uuid();
 
   @Column('text')
-  name: string;
+  name!: string;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @OneToMany(() => Product, (product) => product.preferredShop)
-  products: Product[];
+  products!: Product[];
 
   @OneToMany(() => TripStop, (stop) => stop.shop)
-  stops: TripStop[];
+  stops!: TripStop[];
 }

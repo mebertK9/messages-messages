@@ -10,25 +10,25 @@ export class Notification {
   id = uuid();
 
   @Column('uuid')
-  wishId: string;
+  wishId!: string;
 
   @ManyToOne(() => Wish, { onDelete: 'CASCADE', eager: true })
   @JoinColumn({ name: 'wishId' })
-  wish: Wish;
+  wish!: Wish;
 
   @Column('uuid')
-  recipientId: string;
+  recipientId!: string;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE', eager: true })
   @JoinColumn({ name: 'recipientId' })
-  recipient: User;
+  recipient!: User;
 
   @Column('enum', { enum: ['wishOnTrip', 'wishAddedToActiveTrip', 'wishRetracted', 'wishNotFound'] })
-  type: 'wishOnTrip' | 'wishAddedToActiveTrip' | 'wishRetracted' | 'wishNotFound';
+  type!: 'wishOnTrip' | 'wishAddedToActiveTrip' | 'wishRetracted' | 'wishNotFound';
 
   @Column('boolean', { default: false })
-  read: boolean;
+  read!: boolean;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 }

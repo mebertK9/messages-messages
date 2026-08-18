@@ -10,25 +10,25 @@ export class TripStop {
   id = uuid();
 
   @Column('uuid')
-  tripId: string;
+  tripId!: string;
 
   @ManyToOne(() => ShoppingTrip, { onDelete: 'CASCADE', eager: true })
   @JoinColumn({ name: 'tripId' })
-  trip: ShoppingTrip;
+  trip!: ShoppingTrip;
 
   @Column('uuid')
-  shopId: string;
+  shopId!: string;
 
   @ManyToOne(() => Shop, { onDelete: 'RESTRICT', eager: true })
   @JoinColumn({ name: 'shopId' })
-  shop: Shop;
+  shop!: Shop;
 
   @Column('enum', { enum: ['active', 'done'] })
-  status: 'active' | 'done';
+  status!: 'active' | 'done';
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @OneToMany(() => Wish, (wish) => wish.assignedTripStop)
-  wishes: Wish[];
+  wishes!: Wish[];
 }
