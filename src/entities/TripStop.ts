@@ -11,11 +11,11 @@ export class TripStop {
 
   @Column('uuid')
   tripId!: string;
-
-  @ManyToOne(() => ShoppingTrip, { onDelete: 'CASCADE', eager: true })
-  @JoinColumn({ name: 'tripId' })
-  trip!: ShoppingTrip;
-
+  
+  @ManyToOne(() => ShoppingTrip, { onDelete: 'CASCADE' })
+   @JoinColumn({ name: 'tripId' })
+   trip!: ShoppingTrip;
+ 
   @Column('uuid')
   shopId!: string;
 
