@@ -3,6 +3,7 @@ import { User } from '../entities/User';
 import { hashPassword, comparePassword } from '../utils/password';
 import { signToken, verifyToken } from '../utils/jwt';
 import { ConflictError, UnauthorizedError } from '../utils/errors';
+import { toPublicUser } from '../utils/serialize';
 
 export class AuthService {
   private userRepo = AppDataSource.getRepository(User);
@@ -16,17 +17,21 @@ export class AuthService {
     await this.userRepo.save(user);
 
     const token = signToken(user.id);
-    return { accessToken: token, user };
+    return { accessToken: token, user: toPublicUser(user) };
   }
 
   async login(email: string, password: string) {
-    const user = await this.userRepo.findOne({ where: { email } });
+    const user = await this.userRepo
+      .createQueryBuilder('user')
+      .addSelect('user.passwordHash')
+      .where('user.email = :email', { email })
+      .getOne();
     if (!user || !(await comparePassword(password, user.passwordHash))) {
       throw new UnauthorizedError('Invalid credentials');
     }
 
     const token = signToken(user.id);
-    return { accessToken: token, user };
+    return { accessToken: token, user: toPublicUser(user) };
   }
 
   verifyToken(token: string) {

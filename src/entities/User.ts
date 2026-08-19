@@ -15,7 +15,7 @@ export class User {
   @Column('text')
   name!: string;
 
-  @Column('text')
+  @Column('text', { select: false })
   passwordHash!: string;
 
   @CreateDateColumn()
