@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import 'reflect-metadata';
 import { AppDataSource } from './config/database';
 import { errorHandler } from './middleware/errorHandler';
@@ -13,7 +14,20 @@ import notificationsRoutes from './routes/notifications';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Comma-separated list of allowed frontend origins, e.g.
+// "http://localhost:5173,https://household-wishlist-web.onrender.com"
+const allowedOrigins = (process.env.CORS_ORIGINS ?? '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 // Middleware
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true
+  })
+);
 app.use(express.json());
 
 // Routes
