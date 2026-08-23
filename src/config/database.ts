@@ -2,6 +2,7 @@ import { DataSource } from 'typeorm';
 import path from 'path';
 import { User } from '../entities/User';
 import { Shop } from '../entities/Shop';
+import { Category } from '../entities/Category';
 import { Product } from '../entities/Product';
 import { Wish } from '../entities/Wish';
 import { ShoppingTrip } from '../entities/ShoppingTrip';
@@ -33,6 +34,6 @@ export const AppDataSource = new DataSource({
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
   synchronize: false,
   logging: isDev,
-  entities: [User, Shop, Product, Wish, ShoppingTrip, TripStop, Notification],
+  entities: [User, Shop, Category, Product, Wish, ShoppingTrip, TripStop, Notification],
   migrations: [migrationsGlob],
 });
