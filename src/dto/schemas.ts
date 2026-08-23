@@ -13,6 +13,7 @@ export const loginSchema = z.object({
 
 export const createProductSchema = z.object({
   name: z.string().min(1),
+  categoryId: z.string().uuid(),
 });
 
 export const updateProductSchema = z.object({

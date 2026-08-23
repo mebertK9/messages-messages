@@ -5,11 +5,15 @@ import { NotFoundError } from '../utils/errors';
 export class ProductService {
   private productRepo = AppDataSource.getRepository(Product);
 
-  async list(options?: { unassigned?: boolean }) {
+  async list(options?: { unassigned?: boolean; categoryId?: string }) {
     let query = this.productRepo.createQueryBuilder('product').leftJoinAndSelect('product.preferredShop', 'shop');
 
     if (options?.unassigned) {
       query = query.where('product.preferredShopId IS NULL');
+    }
+
+    if (options?.categoryId) {
+      query = query.andWhere('product.categoryId = :categoryId', { categoryId: options.categoryId });
     }
 
     return query.orderBy('product.createdAt', 'DESC').getMany();
@@ -21,8 +25,8 @@ export class ProductService {
     return product;
   }
 
-  async create(name: string) {
-    const product = this.productRepo.create({ name });
+  async create(name: string, categoryId: string) {
+    const product = this.productRepo.create({ name, categoryId });
     return this.productRepo.save(product);
   }
 
