@@ -50,7 +50,14 @@ export class WishService {
     let buyer: { id: string } | undefined;
 
     if (activeTrip && product.preferredShopId) {
-      const matchingStop = activeTrip.stops.find((s) => s.shop.id === product.preferredShopId);
+    // A trip stays 'active' as long as any of its stops is - so a stop
+      // that was already completed via "Fertig hier" is still present in
+      // activeTrip.stops. Without the status check here, a new wish for
+      // that stop's shop would be auto-assigned to an already-finished
+      // stop and get stuck in 'onTrip' forever instead of staying 'open'.
+      const matchingStop = activeTrip.stops.find(
+        (s) => s.status === 'active' && s.shop.id === product.preferredShopId
+      );
       if (matchingStop) {
         assignedTripStopId = matchingStop.id;
         buyer = activeTrip.startedBy;
