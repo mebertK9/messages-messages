@@ -1,3 +1,4 @@
+import { EntityManager } from 'typeorm';
 import { AppDataSource } from '../config/database';
 import { ShoppingTrip } from '../entities/ShoppingTrip';
 import { TripStop } from '../entities/TripStop';
@@ -19,7 +20,24 @@ export class TripService {
   }
 
   async getById(id: string) {
-    const trip = await this.tripRepo.findOne({ where: { id }, relations: ['stops', 'stops.wishes'] });
+    return this.findTripOrThrow(AppDataSource.manager, id);
+  }
+
+  /**
+   * Shared lookup used by both the plain getById() and create(). Takes an
+   * explicit EntityManager so callers running inside a transaction can pass
+   * its manager (tm) instead of the default one. This matters: a lookup via
+   * the default manager runs on a different DB connection, which - under
+   * normal read-committed isolation - cannot see rows written by a
+   * transaction that hasn't committed yet. Using the wrong manager here
+   * previously made create() think its own not-yet-committed trip didn't
+   * exist, which rolled the whole transaction back.
+   */
+  private async findTripOrThrow(manager: EntityManager, id: string): Promise<ShoppingTrip> {
+    const trip = await manager.findOne(ShoppingTrip, {
+      where: { id },
+      relations: ['stops', 'stops.wishes']
+    });
     if (!trip) throw new NotFoundError('Trip not found');
     return trip;
   }
@@ -51,7 +69,9 @@ export class TripService {
         }
       }
 
-      return this.getById(trip.id);
+      // Must use tm here, not this.getById()/this.tripRepo - the trip and
+      // its stops only exist inside this not-yet-committed transaction.
+      return this.findTripOrThrow(tm, trip.id);
     });
   }
 
