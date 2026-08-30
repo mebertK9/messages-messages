@@ -50,7 +50,7 @@ export class WishService {
     let buyer: { id: string } | undefined;
 
     if (activeTrip && product.preferredShopId) {
-    // A trip stays 'active' as long as any of its stops is - so a stop
+      // A trip stays 'active' as long as any of its stops is - so a stop
       // that was already completed via "Fertig hier" is still present in
       // activeTrip.stops. Without the status check here, a new wish for
       // that stop's shop would be auto-assigned to an already-finished
