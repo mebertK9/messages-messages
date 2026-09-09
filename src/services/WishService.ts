@@ -1,6 +1,5 @@
 import { AppDataSource } from '../config/database';
 import { Wish } from '../entities/Wish';
-import { ShoppingTrip } from '../entities/ShoppingTrip';
 import { NotFoundError, ForbiddenError } from '../utils/errors';
 import { NotificationService } from './NotificationService';
 
