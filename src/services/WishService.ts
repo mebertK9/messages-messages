@@ -7,8 +7,6 @@ import { ProductService } from './ProductService';
 
 export class WishService {
   private wishRepo = AppDataSource.getRepository(Wish);
-  private tripRepo = AppDataSource.getRepository(ShoppingTrip);
-  private productService = new ProductService();
   private notificationService = new NotificationService();
 
   async list(options?: { status?: string; createdById?: string; shopId?: string }) {
