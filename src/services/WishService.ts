@@ -38,48 +38,14 @@ export class WishService {
   }
 
   async create(productId: string, createdById: string) {
-    const product = await this.productService.getById(productId);
-
-    // Check for active trip
-    const activeTrip = await this.tripRepo.findOne({
-      where: { status: 'active' },
-      relations: ['stops', 'stops.shop'],
-    });
-
-    let assignedTripStopId: string | undefined;
-    let buyer: { id: string } | undefined;
-
-    if (activeTrip && product.preferredShopId) {
-      // A trip stays 'active' as long as any of its stops is - so a stop
-      // that was already completed via "Fertig hier" is still present in
-      // activeTrip.stops. Without the status check here, a new wish for
-      // that stop's shop would be auto-assigned to an already-finished
-      // stop and get stuck in 'onTrip' forever instead of staying 'open'.
-      const matchingStop = activeTrip.stops.find(
-        (s) => s.status === 'active' && s.shop.id === product.preferredShopId
-      );
-      if (matchingStop) {
-        assignedTripStopId = matchingStop.id;
-        buyer = activeTrip.startedBy;
-      }
-    }
-
     const wish = this.wishRepo.create({
       productId,
       createdById,
-      status: assignedTripStopId ? 'onTrip' : 'open',
+      status:  'open',
       assignedTripStopId,
     });
 
     await this.wishRepo.save(wish);
-
-    // Notify creator
-    await this.notificationService.create(wish.id, createdById, assignedTripStopId ? 'wishOnTrip' : undefined);
-
-    // Notify buyer if auto-assigned
-    if (buyer) {
-      await this.notificationService.create(wish.id, buyer.id, 'wishAddedToActiveTrip');
-    }
 
     return wish;
   }
