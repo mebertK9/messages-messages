@@ -41,8 +41,7 @@ export class WishService {
     const wish = this.wishRepo.create({
       productId,
       createdById,
-      status:  'open',
-      assignedTripStopId,
+      status:  'open'
     });
 
     await this.wishRepo.save(wish);
