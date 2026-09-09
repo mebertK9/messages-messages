@@ -3,7 +3,6 @@ import { Wish } from '../entities/Wish';
 import { ShoppingTrip } from '../entities/ShoppingTrip';
 import { NotFoundError, ForbiddenError } from '../utils/errors';
 import { NotificationService } from './NotificationService';
-import { ProductService } from './ProductService';
 
 export class WishService {
   private wishRepo = AppDataSource.getRepository(Wish);
