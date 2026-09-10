@@ -31,8 +31,12 @@ export class ProductService {
   }
 
   async updatePreferredShop(id: string, preferredShopId: string) {
-    const product = await this.getById(id);
-    product.preferredShopId = preferredShopId;
-    return this.productRepo.save(product);
+    // A plain column update, not load-then-save(): see TripService for why
+    // mixing a raw FK column write with an already (eagerly) loaded relation
+    // object on the same entity is unreliable. update() never loads or
+    // touches the relation object at all, so there's nothing to conflict
+    // with. getById() re-fetches a clean, fresh entity for the response.
+    await this.productRepo.update(id, { preferredShopId });
+    return this.getById(id);
   }
 }

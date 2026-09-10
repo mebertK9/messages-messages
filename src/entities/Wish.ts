@@ -25,8 +25,13 @@ export class Wish {
   @JoinColumn({ name: 'createdById' })
   createdBy!: User;
 
+  // Explicitly string | null (not just optional): the column is nullable in
+  // Postgres, and clearing it (see TripService.completeStop) means writing
+  // an actual SQL NULL via update(), which requires null here - undefined
+  // is silently skipped by both save() and update() and would leave the old
+  // value in place.
   @Column('uuid', { nullable: true })
-  assignedTripStopId?: string;
+  assignedTripStopId?: string | null;
 
   @ManyToOne(() => TripStop, (stop) => stop.wishes, { onDelete: 'SET NULL', nullable: true, eager: true })
   @JoinColumn({ name: 'assignedTripStopId' })
