@@ -61,9 +61,15 @@ export class TripService {
         for (const wishId of stopData.wishIds || []) {
           const wish = await tm.findOne(Wish, { where: { id: wishId } });
           if (wish) {
-            wish.status = 'onTrip';
-            wish.assignedTripStopId = stop.id;
-            await tm.save(wish);
+            // A targeted column update instead of mutating-then-save()ing
+            // the full (eagerly loaded) entity: update() only ever touches
+            // exactly the columns given here, so it can neither read from
+            // nor be overridden by any relation object that TypeORM happens
+            // to have eager-loaded alongside it elsewhere in this
+            // transaction. See completeStop() below for a concrete case
+            // where that eager baggage previously overwrote this exact
+            // assignment again a few lines later.
+            await tm.update(Wish, wish.id, { status: 'onTrip', assignedTripStopId: stop.id });
             await this.notificationService.create(wish.id, wish.createdById, 'wishOnTrip');
           }
         }
@@ -85,29 +91,36 @@ export class TripService {
 
       for (const wish of stop.wishes) {
         if (notFoundWishIds.includes(wish.id)) {
-          wish.status = 'open';
-          wish.assignedTripStopId = undefined;
-          await tm.save(wish);
+          // update(), not save(): see the comment in create(). This matters
+          // doubly here - stop.wishes (loaded above) stays populated with
+          // this very wish for the rest of the method, and saving the full
+          // `stop` entity afterwards would let TypeORM "fix up" the relation
+          // from that stale array, silently re-attaching the wish to the
+          // stop it was just supposed to leave.
+          await tm.update(Wish, wish.id, { status: 'open', assignedTripStopId: null });
           await this.notificationService.create(wish.id, wish.createdById, 'wishNotFound');
         } else {
-          wish.status = 'purchased';
-          await tm.save(wish);
+          await tm.update(Wish, wish.id, { status: 'purchased' });
         }
       }
 
-      stop.status = 'done';
-      await tm.save(stop);
+      // Plain column update for the same reason - stop.wishes is still
+      // attached to this `stop` object, so save(stop) would re-trigger
+      // exactly the fix-up described above.
+      await tm.update(TripStop, stop.id, { status: 'done' });
 
       const trip = await tm.findOne(ShoppingTrip, {
         where: { id: tripId },
         relations: ['stops'],
       });
+      // The stop's own status update above already happened in this same
+      // transaction, so this read sees it as 'done' - no separate handling
+      // needed for "the stop we just completed".
       if (trip && trip.stops.every((s) => s.status === 'done')) {
-        trip.status = 'done';
-        await tm.save(trip);
+        await tm.update(ShoppingTrip, tripId, { status: 'done' });
       }
 
-      return stop;
+      return tm.findOneOrFail(TripStop, { where: { id: stop.id } });
     });
   }
 }
