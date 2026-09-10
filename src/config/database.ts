@@ -35,5 +35,10 @@ export const AppDataSource = new DataSource({
   synchronize: false,
   logging: isDev,
   entities: [User, Shop, Category, Product, Wish, ShoppingTrip, TripStop, Notification],
-  migrations: [migrationsGlob],
+  // Vitest's own ESM transform of the migration files conflicts with
+  // TypeORM's dynamic import() of that same glob during initialize(), so
+  // integration tests opt out of loading them entirely - the test database
+  // is already migrated ahead of time via the CLI, and tests never need to
+  // run/revert migrations through this DataSource instance.
+  migrations: process.env.SKIP_MIGRATIONS_ON_INIT === 'true' ? [] : [migrationsGlob],
 });
