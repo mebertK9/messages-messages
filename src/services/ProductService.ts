@@ -30,13 +30,13 @@ export class ProductService {
     return this.productRepo.save(product);
   }
 
-  async updatePreferredShop(id: string, preferredShopId: string) {
-    // A plain column update, not load-then-save(): see TripService for why
-    // mixing a raw FK column write with an already (eagerly) loaded relation
-    // object on the same entity is unreliable. update() never loads or
-    // touches the relation object at all, so there's nothing to conflict
-    // with. getById() re-fetches a clean, fresh entity for the response.
-    await this.productRepo.update(id, { preferredShopId });
+  /**
+   * Partial update - either field alone, or both at once. Both are plain
+   * column updates (see the comment this replaces below): no load-then-save
+   * on an entity carrying other eager relations that could interfere.
+   */
+  async update(id: string, changes: { preferredShopId?: string; categoryId?: string }) {
+    await this.productRepo.update(id, changes);
     return this.getById(id);
   }
 }

@@ -32,7 +32,7 @@ router.post('/', authenticated, async (req, res, next) => {
 router.patch('/:productId', authenticated, async (req, res, next) => {
   try {
     const body = updateProductSchema.parse(req.body);
-    const product = await productService.updatePreferredShop(req.params.productId, body.preferredShopId);
+    const product = await productService.update(req.params.productId, body);
     res.json(product);
   } catch (err) {
     next(err);

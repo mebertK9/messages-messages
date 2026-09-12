@@ -16,9 +16,14 @@ export const createProductSchema = z.object({
   categoryId: z.string().uuid(),
 });
 
-export const updateProductSchema = z.object({
-  preferredShopId: z.string().uuid(),
-});
+export const updateProductSchema = z
+  .object({
+    preferredShopId: z.string().uuid().optional(),
+    categoryId: z.string().uuid().optional(),
+  })
+  .refine((data) => data.preferredShopId !== undefined || data.categoryId !== undefined, {
+    message: 'At least one of preferredShopId or categoryId must be provided',
+  });
 
 export const createWishSchema = z.object({
   productId: z.string().uuid(),
