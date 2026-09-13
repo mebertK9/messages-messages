@@ -10,10 +10,10 @@ export class User {
   id = uuid();
 
   @Column('text', { unique: true })
-  email!: string;
-
-  @Column('text')
   name!: string;
+
+  @Column('text', { unique: true, nullable: true })
+  email?: string | null;
 
   @Column('text', { select: false })
   passwordHash!: string;

@@ -16,8 +16,8 @@ export class UserService {
     // Return safe data (no passwordHash)
     return {
       id: user.id,
-      email: user.email,
       name: user.name,
+      email: user.email,
     };
   }
 }
