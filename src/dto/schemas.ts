@@ -16,6 +16,19 @@ export const createProductSchema = z.object({
   categoryId: z.string().uuid(),
 });
 
+export const updateMeSchema = z
+  .object({
+    email: z.string().email().optional(),
+    currentPassword: z.string().min(1).optional(),
+    newPassword: z.string().min(8).optional(),
+  })
+  .refine((data) => (data.newPassword === undefined) === (data.currentPassword === undefined), {
+    message: 'currentPassword and newPassword must be provided together',
+  })
+  .refine((data) => data.email !== undefined || data.newPassword !== undefined, {
+    message: 'Nothing to update',
+  });
+
 export const updateProductSchema = z
   .object({
     preferredShopId: z.string().uuid().optional(),

@@ -6,6 +6,7 @@ import { Wish } from '../src/entities/Wish';
 import { TripService } from '../src/services/TripService';
 import { ProductService } from '../src/services/ProductService';
 import { AuthService } from '../src/services/AuthService';
+import { UserService } from '../src/services/UserService';
 
 // Fixed ids seeded by the migrations (see SeedShops migration).
 const REWE_SHOP_ID = '55555555-5555-4555-8555-555555555555';
@@ -271,6 +272,71 @@ describe('login with name, optional email', () => {
 
     await expect(
       authService.register('Kiddo Two', 'password456', 'family@example.com')
+    ).rejects.toThrow();
+  });
+});
+
+describe('self-service: updateMe (own data maintenance)', () => {
+  let authService: AuthService;
+  let userService: UserService;
+
+  beforeAll(async () => {
+    if (!AppDataSource.isInitialized) {
+      await AppDataSource.initialize();
+    }
+    authService = new AuthService();
+    userService = new UserService();
+  });
+
+  afterAll(async () => {
+    await AppDataSource.destroy();
+  });
+
+  beforeEach(async () => {
+    await AppDataSource.query('TRUNCATE TABLE users RESTART IDENTITY CASCADE');
+  });
+
+  it('changes the email alone, no password needed', async () => {
+    const { user } = await authService.register('Kiddo One', 'password123');
+
+    const updated = await userService.updateMe(user.id, { email: 'new@example.com' });
+    expect(updated.email).toBe('new@example.com');
+
+    // Login still works with the unchanged password.
+    await expect(authService.login('Kiddo One', 'password123')).resolves.toBeTruthy();
+  });
+
+  it('changes the password only with a correct current password, and the new one then works', async () => {
+    const { user } = await authService.register('Kiddo One', 'password123');
+
+    await userService.updateMe(user.id, {
+      currentPassword: 'password123',
+      newPassword: 'password456',
+    });
+
+    await expect(authService.login('Kiddo One', 'password456')).resolves.toBeTruthy();
+    await expect(authService.login('Kiddo One', 'password123')).rejects.toThrow();
+  });
+
+  it('rejects a password change with a wrong current password, leaving the old one intact', async () => {
+    const { user } = await authService.register('Kiddo One', 'password123');
+
+    await expect(
+      userService.updateMe(user.id, {
+        currentPassword: 'wrong-password',
+        newPassword: 'password456',
+      })
+    ).rejects.toThrow();
+
+    await expect(authService.login('Kiddo One', 'password123')).resolves.toBeTruthy();
+  });
+
+  it('rejects changing the email to one already used by someone else', async () => {
+    await authService.register('Kiddo One', 'password123', 'taken@example.com');
+    const { user: kiddoTwo } = await authService.register('Kiddo Two', 'password456');
+
+    await expect(
+      userService.updateMe(kiddoTwo.id, { email: 'taken@example.com' })
     ).rejects.toThrow();
   });
 });
